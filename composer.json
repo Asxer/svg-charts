@@ -1,5 +1,5 @@
 {
-  "name": "dpodsiadlo/svg-charts",
+  "name": "asxer/svg-charts",
   "description": "SVG Charts Generator for Laravel & DOMPDF",
   "keywords": [
     "laravel",
