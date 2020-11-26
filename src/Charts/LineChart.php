@@ -4,6 +4,7 @@
 namespace DPodsiadlo\SvgCharts\Charts;
 
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\View;
 
 class LineChart extends Chart
@@ -18,7 +19,8 @@ class LineChart extends Chart
         'valueGroups' => 5,
         'width' => 1600,
         'height' => 900,
-        'margin' => 10
+        'margin' => 10,
+        'margins' => []
     ];
 
 
@@ -111,14 +113,24 @@ class LineChart extends Chart
         $step = ceil(count($this->data['labels']) / 10);
 
         $i = 0;
-        $wth = ($this->width * .9 - 2 * $this->margin) / count($this->data['labels']);
+        $wth = ($this->width * .9 - 2 * $this->margin);
         $x = $this->margin + ($this->width * 0.1);
+
+        $c = empty($this->options['margins']) ? count($this->data['labels']) : array_sum($this->options['margins']);
+
+        $stepX = $wth / $c;
 
         foreach ($this->data['labels'] as $ts => $label) {
             if (0 === $i++ % $step) {
-
                 $res['labels'][$x] = $this->data['labels'][$ts];
-                $x += $wth * $step;
+
+                if (empty($this->options['margins'])) {
+                    $x += $stepX;
+                } else {
+                    $margin = Arr::get($this->options, "margins.{$ts}", count($this->options['margins']));
+
+                    $x += $stepX * $margin;
+                }
 
             }
         }
@@ -127,6 +139,7 @@ class LineChart extends Chart
         for ($i = 1; $i < $this->valueGroups; $i++) {
             $y = $this->height * .9 - $this->margin - ($i / $this->valueGroups) * ($this->height * .9 - 2 * $this->margin);
             $res['values'][$y] = $this->min + $i * ($this->max - $this->min) / $this->valueGroups;
+            $res['margins'][$y] = Arr::get($this->options, "margings.{$i}", $this->options['margin']);
 
             if (isset($this->options['valueFormatter'])) {
                 $res['values'][$y] = $this->options['valueFormatter']($res['values'][$y]);
@@ -149,22 +162,26 @@ class LineChart extends Chart
 
         foreach ($this->data['data'] as $data) {
 
-            $c = count($data);
+            $c = empty($this->options['margins']) ? count($data) : array_sum($this->options['margins']);
 
             $stepX = $wth / $c;
 
-            $x = $this->axisX0 - $stepX;
-
+            $x = $this->axisX0 - $stepX + 2 * $this->margin;
 
             $path = "M" . $this->axisX0 . " " . $this->axisY0;
 
-            foreach ($data as $value) {
+            foreach ($data as $i => $value) {
                 $y = $this->axisY0 - ($value - $this->min) / ($this->max - $this->min) * $hth;
 
-                $x += $stepX;
+                if (empty($this->options['margins'])) {
+                    $x += $stepX;
+                } else {
+                    $margin = Arr::get($this->options, "margins.{$i}", count($data));
+
+                    $x += $stepX * $margin;
+                }
+
                 $path .= " L" . $x . " " . $y;
-
-
             }
 
             $path .= " L" . $x . " " . $this->axisY0;

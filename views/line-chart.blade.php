@@ -14,12 +14,12 @@
                   style="stroke:{{$axisColor}};stroke-width:{{$axisWidth}}"/>
 
             @foreach($grid['values'] as $y => $val)
-                <line x1="{{$margin}}"
+                <line x1="{{$grid['margins'][$y]}}"
                       y1="{{$y}}"
                       x2="{{$axisX1}}"
                       y2="{{$y}}"
                       style="stroke:{{$gridColor}};stroke-width:{{$gridWidth}}"/>
-                <text style="font-family: sans-serif; font-size: 20pt;" x="{{$margin}}" y="{{$y-$height*.01}}" fill="{{$axisColor}}"
+                <text style="font-family: sans-serif; font-size: 20pt;" x="{{$grid['margins'][$y]}}" y="{{$y-$height*.01}}" fill="{{$axisColor}}"
                       text-anchor="start">{{$val}}</text>
             @endforeach
             @foreach($grid['labels'] as $x => $label)
