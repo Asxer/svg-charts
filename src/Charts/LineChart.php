@@ -104,50 +104,10 @@ class LineChart extends Chart
      */
     private function grid()
     {
-        $res = [
-            'values' => [],
-            'labels' => []
+        return [
+            'X' => $this->getXItems(),
+            'Y' => $this->getYItems()
         ];
-
-
-        $step = ceil(count($this->data['labels']) / 10);
-
-        $i = 0;
-        $wth = ($this->width * .9 - 2 * $this->margin);
-        $x = $this->margin + ($this->width * 0.1);
-
-        $c = empty($this->options['margins']) ? count($this->data['labels']) : array_sum($this->options['margins']);
-
-        $stepX = $wth / $c;
-
-        foreach ($this->data['labels'] as $ts => $label) {
-            if (0 === $i++ % $step) {
-                $res['labels'][$x] = $this->data['labels'][$ts];
-
-                if (empty($this->options['margins'])) {
-                    $x += $stepX;
-                } else {
-                    $margin = Arr::get($this->options, "margins.{$ts}", count($this->options['margins']));
-
-                    $x += $stepX * $margin;
-                }
-
-            }
-        }
-
-
-        for ($i = 1; $i < $this->valueGroups; $i++) {
-            $y = $this->height * .9 - $this->margin - ($i / $this->valueGroups) * ($this->height * .9 - 2 * $this->margin);
-            $res['values'][$y] = $this->min + $i * ($this->max - $this->min) / $this->valueGroups;
-            $res['margins'][$y] = Arr::get($this->options, "margings.{$i}", $this->options['margin']);
-
-            if (isset($this->options['valueFormatter'])) {
-                $res['values'][$y] = $this->options['valueFormatter']($res['values'][$y]);
-            }
-        }
-
-
-        return $res;
     }
 
     /**
@@ -157,34 +117,21 @@ class LineChart extends Chart
     {
         $res = [];
 
-        $wth = $this->width * .9 - 2 * $this->margin;
         $hth = $this->height * .9 - 2 * $this->margin;
 
-        foreach ($this->data['data'] as $data) {
+        $xPositions = $this->getXPositions(count($this->data['data']));
 
-            $c = empty($this->options['margins']) ? count($data) : array_sum($this->options['margins']);
-
-            $stepX = $wth / $c;
-
-            $x = $this->axisX0 - $stepX + 2 * $this->margin;
+        foreach ($this->data['data'] as $i => $data) {
 
             $path = "M" . $this->axisX0 . " " . $this->axisY0;
 
             foreach ($data as $i => $value) {
                 $y = $this->axisY0 - ($value - $this->min) / ($this->max - $this->min) * $hth;
 
-                if (empty($this->options['margins'])) {
-                    $x += $stepX;
-                } else {
-                    $margin = Arr::get($this->options, "margins.{$i}", count($data));
-
-                    $x += $stepX * $margin;
-                }
-
-                $path .= " L" . $x . " " . $y;
+                $path .= " L" . $xPositions[$i] . " " . $y;
             }
 
-            $path .= " L" . $x . " " . $this->axisY0;
+            $path .= " L" . $xPositions[$i] . " " . $this->axisY0;
 
 
             $res[] = $path;
@@ -212,8 +159,44 @@ class LineChart extends Chart
             default:
                 return $this->options[$name];
         }
+    }
 
+    protected function getXItems()
+    {
+        $xPositions = $this->getXPositions(count($this->data['labels']));
 
+        return array_map(function ($x, $index) {
+            return [
+                'x' => $x,
+                'text' => $this->data['labels'][$index]
+            ];
+        }, $xPositions, array_keys($xPositions));
+    }
+
+    protected function getYItems()
+    {
+        return array_map(function ($index) {
+            return [
+                'y' => $this->height * .9 - $this->margin - ($index / $this->valueGroups) * ($this->height * .9 - 2 * $this->margin),
+                'text' => $this->min + $index * ($this->max - $this->min) / $this->valueGroups
+            ];
+        }, array_keys($this->data['data'][0]));
+    }
+
+    protected function getXPositions()
+    {
+        $x = $this->margin + ($this->width * 0.1);
+
+        $gridSize = ($this->axisX0 + $this->axisX1) / array_sum($this->options['margins']);
+        $result = [];
+
+        foreach ($this->options['margins'] as $margin) {
+            $result[] = $x;
+
+            $x += $gridSize * $margin;
+        }
+
+        return $result;
     }
 
 }

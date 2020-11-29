@@ -13,23 +13,36 @@
                   y2="{{$axisY1}}"
                   style="stroke:{{$axisColor}};stroke-width:{{$axisWidth}}"/>
 
-            @foreach($grid['values'] as $y => $val)
-                <line x1="{{$grid['margins'][$y]}}"
-                      y1="{{$y}}"
+            @foreach($grid['Y'] as $val)
+                <line x1="{{$margin}}"
+                      y1="{{$val['y']}}"
                       x2="{{$axisX1}}"
-                      y2="{{$y}}"
+                      y2="{{$val['y']}}"
                       style="stroke:{{$gridColor}};stroke-width:{{$gridWidth}}"/>
-                <text style="font-family: sans-serif; font-size: 20pt;" x="{{$grid['margins'][$y]}}" y="{{$y-$height*.01}}" fill="{{$axisColor}}"
-                      text-anchor="start">{{$val}}</text>
+
+                <text style="font-family: sans-serif; font-size: 20pt;"
+                      x="{{$margin}}"
+                      y="{{ $val['y'] + 25}}"
+                      fill="{{ $axisColor }}"
+                      text-anchor="start">
+                    {{$val['text']}}
+                </text>
             @endforeach
-            @foreach($grid['labels'] as $x => $label)
-                <line x1="{{$x}}"
-                      y1="{{$height*.9-$margin}}"
-                      x2="{{$x}}"
-                      y2="{{$height*.91-$margin}}"
+
+            @foreach($grid['X'] as $label)
+                <line x1="{{$label['x']}}"
+                      y1="{{$axisY0}}"
+                      x2="{{$label['x']}}"
+                      y2="{{$axisY0 + 5}}"
                       style="stroke:{{$gridColor}};stroke-width:{{$gridWidth}}"/>
-                <text style="font-family: sans-serif; font-size: 20pt;" x="{{$x}}" y="{{$height*.93}}" fill="{{$axisColor}}"
-                      text-anchor="middle">{{$label}}</text>
+
+                <text style="font-family: sans-serif; font-size: 14pt;"
+                      x="{{$label['x']}}"
+                      y="{{$axisY0 + 25}}"
+                      fill="{{$axisColor}}"
+                      text-anchor="middle">
+                    {{$label['text']}}
+                </text>
             @endforeach
 
 
