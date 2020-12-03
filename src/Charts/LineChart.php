@@ -32,7 +32,6 @@ class LineChart extends Chart
     {
         parent::__construct($data, $options);
 
-
         $this->min = PHP_INT_MAX;
         $this->max = -PHP_INT_MAX;
 
@@ -54,8 +53,6 @@ class LineChart extends Chart
             $this->max = 0;
 
         }
-
-
     }
 
     /**
@@ -175,12 +172,18 @@ class LineChart extends Chart
 
     protected function getYItems()
     {
-        return array_map(function ($index) {
-            return [
-                'y' => $this->height * .9 - $this->margin - ($index / $this->valueGroups) * ($this->height * .9 - 2 * $this->margin),
-                'text' => $this->min + $index * ($this->max - $this->min) / $this->valueGroups
+        $result = [];
+        $valueStep = ($this->max - $this->min) / $this->valueGroups;
+        $yStep = ($this->height * .9 - $this->margin) / $this->valueGroups;
+
+        for ($i = 0; $i <= $this->valueGroups; $i++) {
+            $result[] = [
+                'y' => $this->height * 0.9 - $this->margin - $i * $yStep,
+                'text' => $this->min + $i * $valueStep
             ];
-        }, array_keys($this->data['data'][0]));
+        }
+
+        return $result;
     }
 
     protected function getXPositions()
